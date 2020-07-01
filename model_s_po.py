@@ -78,31 +78,9 @@ class model_fn(object):
         self.train_op = optimization.create_optimizer(self.loss, learning_rate, num_train_steps, num_warmup_steps,
                                                       False)
 
-        # optimizer = tf.train.AdamOptimizer(0.001)
-        # grads_and_vars = optimizer.compute_gradients(self.loss)
-        # self.train_op = optimizer.apply_gradients(grads_and_vars, global_step=self.global_step)
-    def masked_loss(self, mask, selection_logits):
-        u_s = tf.expand_dims(mask, 2) * tf.expand_dims(mask, 1)
-        v = tf.expand_dims(u_s, 2)
-        selection_mask = tf.tile(v, (1, 1, 2, 1))  #
-        prob = tf.nn.sigmoid(selection_logits, name='score')
-        selct_tag = prob * tf.cast(selection_mask, tf.float32)
-        selection_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=self.tag_inputs, logits=selection_logits)
-        selection_loss = tf.reduce_sum(selection_loss * tf.cast(selection_mask, tf.float32))  # (2,4)
-        # selection_loss /= tf.reduce_sum( tf.cast(mask, tf.float32))
-        return selection_loss, selct_tag
+       
 
-    # ======================
-    # tensorflow 1.4版本使用
-    # 获取s对应的向量
-    def batch_gather(self, s_index, p_index):
-        out = []
-        for i in range(self.batch_size):
-            s = tf.gather(self.encoder[i], s_index[i], axis=0)
-            o = tf.gather(self.encoder[i], p_index[i], axis=0)
-            s_p = tf.concat((s, o), axis=-1)
-            out.append(s_p)
-        return out
+   
 
     def trans_s(self, relation_hidden_size, max_len):
         with tf.variable_scope('s_dense'):
